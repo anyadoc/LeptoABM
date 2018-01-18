@@ -1061,12 +1061,12 @@ to e-decay
    repeat 7
    [ set p-inf-rod (e-amount-seroR * 0.01 / 10 ^ 7)
      set p-inf-dog (e-amount-seroD * 0.01 / 10 ^ 7)
-     set e-amount-seroD e-amount-seroD * 0.8
-     set e-amount-seroR e-amount-seroR * 0.8
-     set e-amount-seroD-d e-amount-seroD-d * 0.8
-     set e-amount-seroR-d e-amount-seroR-d * 0.8
-     set e-amount-seroD-r e-amount-seroD-r * 0.8
-     set e-amount-seroR-r e-amount-seroR-r * 0.8
+     set e-amount-seroD e-amount-seroD * decay-factor ;0.8
+     set e-amount-seroR e-amount-seroR * decay-factor ;0.8
+     set e-amount-seroD-d e-amount-seroD-d * decay-factor ;0.8
+     set e-amount-seroR-d e-amount-seroR-d * decay-factor ;0.8
+     set e-amount-seroD-r e-amount-seroD-r * decay-factor ;0.8
+     set e-amount-seroR-r e-amount-seroR-r * decay-factor ;0.8
      ]
    if e-amount-seroD < 1000 [
      set e-amount-seroD 0
@@ -1514,6 +1514,21 @@ PENS
 "SeroD" 1.0 0 -2674135 true "" ""
 "SeroR" 1.0 0 -13345367 true "" ""
 
+SLIDER
+12
+316
+184
+349
+decay-factor
+decay-factor
+0
+1
+0.8
+0.01
+1
+NIL
+HORIZONTAL
+
 @#$#@#$#@
 ## WHAT IS IT?
 
@@ -1856,7 +1871,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0
+NetLogo 6.0.2
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
@@ -2007,6 +2022,31 @@ NetLogo 6.0
     </enumeratedValueSet>
     <enumeratedValueSet variable="sd-init">
       <value value="155"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="l-d-env" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="decay-factor">
+      <value value="0.8"/>
+      <value value="0.4"/>
+      <value value="0.2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="h-init">
+      <value value="615"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="r-init">
+      <value value="500"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Output_file?">
+      <value value="&quot;YES&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="od-init">
+      <value value="155"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sd-init">
+      <value value="160"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
