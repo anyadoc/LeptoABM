@@ -11,12 +11,6 @@ globals
   HH-ycor
   year                           ;resets when a year has passed            ;ABelsare: instead now a year counter, not a week counter
   week                           ;counter for weeks; resets to 1 after 52  ;ABelsare: replaces year in the previous version
-  ;owned dogs
-  ;od-init-prev                  ;prevalence of dog serovar in dogs at setup AB 14Jan18 now a reporter
-  ;stray dogs
-  ;sd-init-prev                  ;prevalence of dog serovar in dogs at setup AB 14Jan18 now a reporter
-  ;rodents
-  ;r-init-prev                    ;prevalence of a rodent serovar in rodents at setup AB 14Jan18 now a reporter
   r-death-prob-juv
   r-death-prob-adult
   r-birth-prob-low
@@ -26,12 +20,6 @@ globals
   ;h-birth-prob                               ;AB 14Jan18 now an agent variable (humans)
   h-incident-case-seroD
   h-incident-case-seroR
-;  p0-dogs
-;  p1-dogs
-;  p2-dogs
-;  p3-dogs
-;  p4-dogs
-;  p5-dogs
   human-dl-inc
   human-dl-inc-per10000
   human-rl-inc
@@ -138,7 +126,7 @@ sdogs-own
 [
   sd-start-patch                                             ;the center of the dogs' homerange
   sd-home-range                                              ;distance for home range
-  sd-HH-id                                                   ;dog's assigned HH
+  ;sd-HH-id                                                   ;dog's assigned HH
   sd-age
   d-SIR-dog-S
   d-SIR-dog-I
@@ -177,7 +165,7 @@ humans-own
   h-prob-move
   h-start-patch
   ;h-birth-prob
-  h-death-prob
+  ;h-death-prob
 ]
 HHs-own
 [ HH-id ]
@@ -256,7 +244,7 @@ to setup
       setxy [ xcor ] of HH h-HH-id [ ycor ] of HH h-HH-id
       set h-start-patch patch-here
       ;set h-birth-prob 0.000266                                             ;AB 14Jan18 not sure why this was a global variable before. Now using to-report.
-      set h-death-prob 0.000266                                              ;AB 14Jan18 not sure why this was a global variable before. Now an agent variable.
+      ;set h-death-prob 0.000266                                             ;AB 14Jan18 not sure why this was a global variable before. Now using to-report.
       set h-SIR-dog-S TRUE
       set h-SIR-dog-I FALSE
       set h-SIR-dog-R FALSE
@@ -276,7 +264,7 @@ to setup
         set size 2
         set od-start-patch patch-here
         set od-age random 53 ;abs (random-normal 0 52)                 ;AB 14Jan18  set od-age abs (random-normal 0 52)-This does not assign age between 0 and 52!
-        set od-home-range 25
+        set od-home-range 25                  ;##
         set d-SIR-dog-S TRUE
         set d-SIR-dog-I FALSE
         set d-SIR-dog-Shed FALSE
@@ -289,15 +277,16 @@ to setup
         set d-days-shed-rod 0
         ;set d-birth-prob (0.1480)                                      ;AB 14Jan18 now a reporter
         set d-death-prob (0.0228)
-        ;let od-infected-init (random-float 1)
+        set d-incub-pd-dog 3 + random 12 ;random (18) + 3               ;##;AB 14Jan18 as per the manuscript (table 5) this should be 3-14 days
+        set d-days-incub-dog 0
+        set d-shed-init-dog abs ((random-normal 59000 10000) * 900)
+        set d-rate-decay-dog (0.15 + random-float 0.2)
+        set d-incub-pd-rod 3 + random 19 ;random (11) + 3        ;AB 14Jan18 should be 3-21, changed accordingly
+        set d-days-incub-rod 0
+        set d-shed-init-rod abs((random-normal 59000 10000) * 900)
+        set d-rate-decay-rod (0.3 + random-float 0.4)
         if random-float 1 < od-init-prev [
-          ;if (od-infected-init < od-init-prev) [
           set d-SIR-dog-I TRUE
-          set d-incub-pd-dog 3 + random 12 ;random (18) + 3                          ;AB 14Jan18 as per the manuscript (table 5) this should be 3-14 days
-          set d-days-incub-dog 0
-          set d-shed-init-dog abs ((random-normal 59000 10000) * 900)
-          set d-days-shed-dog 0
-          set d-rate-decay-dog (0.15 + random-float 0.2)
           set d-SIR-dog-S FALSE
           ]
         set sus 0
@@ -314,7 +303,7 @@ to setup
       setxy xloc yloc                                            ;AB 30Oct17 random-xcor random-ycor
       set sd-start-patch patch xloc yloc
       set sd-age random 53 ;abs (random-normal 0 52)                        ;AB 14Jan18  set sd-age abs (random-normal 0 52)-This does not assign age between 0 and 52!
-      set sd-home-range 50
+      set sd-home-range 50              ;##
       set d-SIR-dog-S TRUE
       set d-SIR-dog-I FALSE
       set d-SIR-dog-Shed FALSE
@@ -327,66 +316,68 @@ to setup
       set d-days-shed-rod 0
       ;set d-birth-prob (0.1480)                                 ;AB 14Jan18 now a reporter
       set d-death-prob (0.0228)
-      ;let sd-infected-init (random-float 1)
-      ;if (sd-infected-init < sd-init-prev)[
+      set d-incub-pd-dog 3 + random 12 ;random (18) + 3         ;## ;AB 14Jan18 as per the manuscript (table 5) this should be 3-14 days
+      set d-days-incub-dog 0
+      set d-shed-init-dog abs ((random-normal 59000 10000) * 900)
+      set d-rate-decay-dog (0.15 + random-float 0.2)
+      set d-incub-pd-rod 3 + random 19 ;random (11) + 3        ;AB 14Jan18 should be 3-21, changed accordingly
+      set d-days-incub-rod 0
+      set d-shed-init-rod abs((random-normal 59000 10000) * 900)
+      set d-rate-decay-rod (0.3 + random-float 0.4)
       if (random-float 1 < sd-init-prev ) [
         set d-SIR-dog-I TRUE
-        set d-incub-pd-dog 3 + random 12  ;(random 18 + 3)                                       ;AB 14Jan18 as per ms (table 5) this should be 3-14 days
-        set d-days-incub-dog 0
-        set d-shed-init-dog abs ((random-normal 59000 10000) * 900)
-        set d-days-shed-dog 0
-        set d-rate-decay-dog (0.15 + random-float 0.2)
         set d-SIR-dog-S FALSE ]
       set sus sdog-addl-sus                                               ;ABelsare 21Jan18 stray dogs are 10% more susceptible to Leptospires compared to owned dogs
       ]
     ]
   if r-init != 0 [
-  create-rodents r-init [
-    set shape "default"
-    set color white
-    set size 1
-    set r-HH-id random ((length HH-xcor) * (length HH-ycor))
-    setxy ([ xcor ] of HH r-HH-id) ([ ycor ] of HH r-HH-id)
-    set r-start-patch patch-here
-    set r-home-range 5
-    set r-age random 17    ;abs (random-normal 0 16)                                      ;AB 14Jan18 this does not result in values between 0 and 16!
-    set r-SIR-dog-S TRUE
-    set r-SIR-dog-I FALSE
-    set r-SIR-dog-Shed FALSE
-    set r-SIR-dog-R FALSE
-    set r-SIR-rod-S TRUE
-    set r-SIR-rod-I FALSE
-    set r-SIR-rod-Shed FALSE
-    set r-SIR-rod-R FALSE
-    set r-birth-prob-high 0.6027
-    set r-birth-prob-low 0.2063
-    set r-death-prob-juv 0.0830
-    set r-death-prob-adult 0.0957
-    ;let r-infected-init (random-float 1)
-    ;if (r-infected-init < r-init-prev)[
-    if random-float 1 < r-init-prev [
-      set r-SIR-rod-I TRUE
+    create-rodents r-init [
+      set shape "default"
+      set color white
+      set size 1
+      set r-HH-id random ((length HH-xcor) * (length HH-ycor))
+      setxy ([ xcor ] of HH r-HH-id) ([ ycor ] of HH r-HH-id)
+      set r-start-patch patch-here
+      set r-home-range 5
+      set r-age random 17    ;abs (random-normal 0 16)                     ;AB 14Jan18 this does not result in values between 0 and 16!
+      set r-SIR-dog-S TRUE
+      set r-SIR-dog-I FALSE
+      set r-SIR-dog-Shed FALSE
+      set r-SIR-dog-R FALSE
+      set r-SIR-rod-S TRUE
+      set r-SIR-rod-I FALSE
+      set r-SIR-rod-Shed FALSE
+      set r-SIR-rod-R FALSE
+      set r-birth-prob-high 0.6027
+      set r-birth-prob-low 0.2063
+      set r-death-prob-juv 0.0830
+      set r-death-prob-adult 0.0957
       set r-incub-pd-rod 7 + random 8 ;random (7) + 7                                         ;AB 14Jan18 changed to make it 7 to 14
       set r-days-incub-rod 0
       set r-shed-init-rod abs ((random-normal 6100000 1500000) * 7.58)
       set r-days-shed-rod 0
       set r-rate-decay-rod (0.15 + random-float 0.2)
-      set r-SIR-rod-S FALSE
+      set r-incub-pd-dog 7 + random 8    ;random (7) + 7   ;AB 14Jan18 changed code to get a value between 7 and 14
+      set r-days-incub-dog 0
+      set r-shed-init-dog abs((random-normal 6100000 1500000) * 7.58)
+      set r-days-shed-dog 0
+      set r-rate-decay-dog (0.3 + random-float 0.4)
+      if random-float 1 < r-init-prev [
+        set r-SIR-rod-I TRUE
+        set r-SIR-rod-S FALSE
+        ]
       ]
     ]
-  ]
   if (Output_file? = "YES") [
     file-open (word "results/HumanLeptoIncidence.csv")
-    ;if (file-exists? (word OutputFileName) = FALSE) [
-    ;file-open (word OutputFileName)
     file-print "Year,AnnualDogSerovarInc/10K,AnnualRodentSerovarInc/10K"
     file-close
     ]
-  ;]
   reset-ticks
 end
 
 to go
+  if (ticks = 0) [ask humans [ ht ] ]                  ;##test
   ;ticks, time, and age
   if (week = 0 or week = 52) [
     set year year + 1
@@ -408,7 +399,6 @@ to go
     set cum-ann-human-rl-inc 0
     set week 1   ;set year 0                                       ;7July17 AVB changed set year 0 to set week 1
     if (Output_file? = "YES") [
-      ;file-open (word OutputFileName)
       file-open (word "results/HumanLeptoIncidence.csv")
       file-type (year - 1) file-type "," file-type ann-human-dl-inc-per10000 file-type "," file-type ann-human-rl-inc-per10000
       file-print""
@@ -495,27 +485,19 @@ to go
 end
 ;---------- OWNED DOGS -----------
 to od-die
-  if (random-float 1 < (d-death-prob * (count odogs / od-init)))[die]
-;  let Nod (count odogs)
-;  let d-death (random-float 1)
-;  if (d-death < d-death-prob * Nod / od-init)
-;  [
-;    die
-;    ]
+  if (random-float 1 < (d-death-prob * (count odogs / od-init))) [
+    die
+  ]
 end
 to od-birth
   if week >= 37 and week <= 52 [                                              ;10July17 AVB year changed to week
     if od-age > 52 [
       if (random-float 1 < d-birth-prob * (od-init / count odogs)) [
-        ;let Nod (count odogs)                                                 ;ABelsare_edits: redundant
-        ;let od-birth-p (random-float 1)                                       ;ABelsare_edits: redundant
-        ;if (od-birth-p < d-birth-prob * od-init / Nod)                        ;ABelsare_edits: change to if (random-float 1 < d-birth-prob * od-init / count odogs
-        ;[
-        hatch 1 [; hatch replacement dogs
+        hatch 1 [                                                             ;hatch replacement dogs
           set shape "wolf"
           set color gray
           set size 2
-          set od-start-patch [od-start-patch] of myself
+          set od-start-patch [ od-start-patch ] of myself
           set od-home-range 25
           set d-SIR-dog-S TRUE
           set d-SIR-dog-I FALSE
@@ -527,6 +509,14 @@ to od-birth
           set d-SIR-rod-R FALSE
           set d-days-shed-dog 0
           set d-days-shed-rod 0
+          set d-incub-pd-dog 3 + random 12 ;random (18) + 3                    ;## ;AB 14Jan18 as per the manuscript (table 5) this should be 3-14 days
+          set d-days-incub-dog 0
+          set d-shed-init-dog abs ((random-normal 59000 10000) * 900)
+          set d-rate-decay-dog (0.15 + random-float 0.2)
+          set d-incub-pd-rod 3 + random 19 ;random (11) + 3        ;AB 14Jan18 should be 3-21, changed accordingly
+          set d-days-incub-rod 0
+          set d-shed-init-rod abs((random-normal 59000 10000) * 900)
+          set d-rate-decay-rod (0.3 + random-float 0.4)
           ;set d-birth-prob 0.1480                                              ;AB 14Jan18 now a reporter
           set d-death-prob 0.0228
           set sus 0
@@ -537,35 +527,33 @@ to od-birth
 end
 to od-go
   repeat 7 [
-    move-to od-start-patch
+    ;move-to od-start-patch                                    ;##
+    pd
     move-to one-of patches in-radius (random-poisson 5)
+    pe
     d-get-infected
     d-shed
+    move-to od-start-patch
     ]
 end
 ;-------- STRAY DOGS -----------------
 to sd-die
-  if random-float 1 < d-death-prob * (count sdogs / sd-init) [ die ]
-;  let Nsd (count sdogs)
-;  let d-death (random-float 1)
-;  if (d-death < d-death-prob * Nsd / sd-init) [die]
+  if random-float 1 < d-death-prob * (count sdogs / sd-init) [
+   die
+ ]
 end
 to sd-birth
   move-to sd-start-patch                                               ;30Oct17 AVB
   if week >= 37 and week <= 52 [                                       ;10July17 AVB year changed to week
     if sd-age > 52 [
       if (random-float 1 < (d-birth-prob * (sd-init / count sdogs))) [
-        ;let Nsd (count sdogs)                                         ;ABelsare_edits: redundant
-        ;let sd-birth-p (random-float 1)                               ;ABelsare_edits: redundant
-        ;if (sd-birth-p < d-birth-prob * sd-init / Nsd)                ;ABelsare_edits: change to if (random-float 1 < d-birth-prob * sd-init / count sdogs)
-        ;[
         hatch 1 [
           set shape "wolf"
           set color gray
           set size 2
           setxy [ xcor ] of myself [ ycor ] of myself     ;random-xcor random-ycor
           set sd-start-patch patch-here
-          set sd-home-range 25 ;50
+          set sd-home-range 50
           set d-SIR-dog-S TRUE
           set d-SIR-dog-I FALSE
           set d-SIR-dog-Shed FALSE
@@ -575,7 +563,17 @@ to sd-birth
           set d-SIR-rod-Shed FALSE
           set d-SIR-rod-R FALSE
           ;set d-birth-prob 0.1480                                   ;ABelsare 14Jan18 now a reporter
-          set d-death-prob 0.0429
+          set d-death-prob 0.0228 ;0429 ##?
+          set d-incub-pd-dog 3 + random 12 ;random (18) + 3          ;## ;AB 14Jan18 as per the manuscript (table 5) this should be 3-14 days
+          set d-days-incub-dog 0
+          set d-shed-init-dog abs ((random-normal 59000 10000) * 900)
+          set d-rate-decay-dog (0.15 + random-float 0.2)
+          set d-days-shed-dog 0
+          set d-days-shed-rod 0
+          set d-incub-pd-rod 3 + random 19 ;random (11) + 3        ;AB 14Jan18 should be 3-21, changed accordingly
+          set d-days-incub-rod 0
+          set d-shed-init-rod abs((random-normal 59000 10000) * 900)
+          set d-rate-decay-rod (0.3 + random-float 0.4)
           set sus sdog-addl-sus
           ]
         ]
@@ -584,19 +582,25 @@ to sd-birth
 end
 to sd-go
   repeat 7 [
-    move-to sd-start-patch
+    pd
+    ;move-to sd-start-patch                                        ;##
     ifelse random 100 < 91                                            ;ABelsare 70% of times  a stray dog will venture on or near households
     [ move-to one-of patches with [ HHs-here? = true ] ]
     [ move-to one-of patches in-radius sd-home-range ]
+    pe
     d-get-infected
     d-shed
+    move-to sd-start-patch
     ]
 end
 to d-get-infected
   ;ABelsare_edit: as per the code, if both serovars are present on a patch, a dog will be infected with dog serovar
   ;17Aug17 changed code so that equal chances of getting infected with either serovar.
   let serovar-list []
-  if (any? odogs-here with [ d-SIR-dog-Shed = TRUE ]) or (any? sdogs-here with [ d-SIR-dog-Shed = TRUE ]) [
+  ;if (any? odogs-here with [ d-SIR-dog-Shed = TRUE ]) or (any? sdogs-here with [ d-SIR-dog-Shed = TRUE ]) [   ;##
+  let inf-odogs odogs with [ d-SIR-dog-Shed = TRUE ]
+  let inf-sdogs sdogs with [ d-SIR-dog-Shed = TRUE ]
+  if (any? inf-odogs in-radius-nowrap 2 or any? inf-sdogs in-radius-nowrap 2) [
     set serovar-list lput "dog-serovar" serovar-list
     ]
   if (any? odogs-here with [ d-SIR-rod-Shed = TRUE ]) or (any? sdogs-here with [ d-SIR-rod-Shed = TRUE ])[
@@ -607,9 +611,9 @@ to d-get-infected
   set serovar-list shuffle serovar-list
   while [ empty? serovar-list = FALSE ] [
     let prob-infection item 0 serovar-list
-    if (prob-infection = "dog-serovar") [ prob-infection-dogserovar ]
+    if (prob-infection = "dog-serovar") [ prob-infection-dogserovar]
     if (prob-infection = "rodent-serovar") [ prob-infection-rodentserovar ]
-    if (prob-infection = "patch-dog-serovar") [ prob-infection-pdogserovar ]
+    if (prob-infection = "patch-dog-serovar") [ prob-infection-pdogserovar]
     if (prob-infection = "patch-rodent-serovar") [ prob-infection-prodentserovar ]
     set serovar-list remove-item 0 serovar-list
     ]
@@ -619,14 +623,9 @@ to prob-infection-dogserovar
     ;if (any? odogs-here with [d-SIR-dog-Shed = TRUE]) or (any? sdogs-here with [d-SIR-dog-Shed = TRUE])[ ;;ABelsare_edits: POTENTIAL ERROR HERE: SHOULD BE any? odogs-here
       ;let prob-inf (random-float 1)                           ;ABelsare_edits:redundant
       ;if prob-inf < 0.01
-    let trans-prob 0.01 + (sus * 0.01)                         ;ABelsare 21Jan18
+    let trans-prob dog-dog-transmission + (sus * dog-dog-transmission) ;0.01 + (sus * 0.01)                         ;ABelsare 21Jan18 ;##dog-dog-transmission
     if random-float 1 < trans-prob [ ;0.01) [
       set d-SIR-dog-I TRUE
-      ;set d-incub-pd-dog random (18) + 3                ;AB 14Jan18 redundant- this agent variable is already set when dogs are created
-      set d-days-incub-dog 0
-      set d-shed-init-dog abs((random-normal 59000 10000) * 900)
-      set d-days-shed-dog 0
-      set d-rate-decay-dog (0.15 + random-float 0.2)
       set d-SIR-dog-S FALSE
       set d-death-prob (d-death-prob * 1)               ;18Aug17 ABelsare_edits: changed from 1.1 to 1 as no change in baseline death rate
                                                         ; if dog is infected with seroD;; also changed set d-death-prob (0.0429 * 1) to set d-death-prob (d-death-prob * 1)
@@ -635,14 +634,9 @@ to prob-infection-dogserovar
 end
 to prob-infection-pdogserovar
   if (d-SIR-dog-S = TRUE and d-SIR-rod-I = FALSE and d-SIR-rod-Shed = FALSE) [;d-SIR-rod-S = TRUE) [ ; AB 14Jan18 changed so that rod resistant dogs can get infected with dog serovar         ;17Aug17 ABelsare_edits: only susceptible dogs get infected from the patch
-    let trans-prob p-inf-dog + (p-inf-dog * sus)       ;ABelsare 21Jan18
+    let trans-prob precision (p-inf-dog + (p-inf-dog * sus)) 3     ;##  ;ABelsare 21Jan18
     if random-float 1 < trans-prob [ ;p-inf-dog) [
       set d-SIR-dog-I TRUE
-      ;set d-incub-pd-dog random (18) + 3                                ;AB 14Jan18 redundant this agent variable is already set when dogs are created
-      set d-days-incub-dog 0
-      set d-shed-init-dog abs((random-normal 59000 10000) * 900)
-      set d-days-shed-dog 0
-      set d-rate-decay-dog (0.15 + random-float 0.2)
       set d-SIR-dog-S FALSE
       set d-death-prob (d-death-prob * 1)                              ;18Aug17 ABelsare_edits: changed from 1.1 to 1 as no change in baseline death rate
                                                                        ; if dog is infected with seroD;; also ;;18Aug17 ABelsare_edits:set d-death-prob d-death-prob * 1
@@ -654,14 +648,9 @@ to prob-infection-rodentserovar
     ;if (any? odogs-here with [d-SIR-rod-Shed = TRUE]) or (any? sdogs-here with [d-SIR-rod-Shed = TRUE]) [   ;;ABelsare_edits: POTENTIAL ERROR HERE: should be any? odogs-here.
       ;let prob-inf (random-float 1)      ;17Aug17 ABelsare_edits redundant
       ;if prob-inf < 0.01
-    let trans-prob 0.01 + (sus * 0.01)
+    let trans-prob dog-dog-transmission + (sus * dog-dog-transmission) ;0.01 + (sus * 0.01)                                   ;##dog-dog-transmission
     if random-float 1 < trans-prob [ ;0.01) [
       set d-SIR-rod-I TRUE
-      set d-incub-pd-rod 3 + random 19 ;random (11) + 3        ;AB 14Jan18 should be 3-21, changed accordingly
-      set d-days-incub-rod 0
-      set d-shed-init-rod abs((random-normal 59000 10000) * 900)
-      set d-days-shed-rod 0
-      set d-rate-decay-rod (0.3 + random-float 0.4)
       set d-SIR-rod-S FALSE
       set d-death-prob (d-death-prob * 1.1)                               ;18Aug17 ABelsare_edits:set d-death-prob d-death-prob * 1.1
       ]
@@ -669,15 +658,9 @@ to prob-infection-rodentserovar
 end
 to prob-infection-prodentserovar
   if (d-SIR-rod-S = TRUE and d-SIR-dog-I = FALSE and d-SIR-dog-Shed = FALSE) [;d-SIR-dog-S = TRUE) [ ;AB 14Jan18 modified
-    ;let prob-inf (random-float 1)
     let trans-prob p-inf-rod + (sus * p-inf-rod)
     if random-float 1 < trans-prob [ ;p-inf-rod) [
       set d-SIR-rod-I TRUE
-      set d-incub-pd-rod 3 + random 19 ;random (11) + 3                     ;AB 14Jan18 should be 3-21, changed accordingly
-      set d-days-incub-rod 0
-      set d-shed-init-rod abs((random-normal 59000 10000) * 900)
-      set d-days-shed-rod 0
-      set d-rate-decay-rod (0.3 + random-float 0.4)
       set d-SIR-rod-S FALSE
       set d-death-prob (d-death-prob * 1.1)                                     ;18Aug17 ABelsare_edits:set d-death-prob d-death-prob * 1.1
       ]
@@ -690,12 +673,13 @@ to d-shed
   ]
   if d-SIR-dog-I = TRUE and d-days-incub-dog = d-incub-pd-dog [
     set d-SIR-dog-Shed TRUE
-    set d-days-shed-dog 0
+    ;set d-days-shed-dog 0
     set d-SIR-dog-I FALSE
  ]
   if d-SIR-dog-Shed = TRUE and d-days-shed-dog <= 3 [
     set d-days-shed-dog d-days-shed-dog + 1
     let new-amt-shed (d-shed-init-dog * (d-days-shed-dog / 3))
+    ;output-print (word "new amount shed dog shedding dog serovar 1 " round new-amt-shed)    ;##
     ask patch-here [
       set e-contaminated-from-dog-d TRUE
       set e-amount-seroD-d e-amount-seroD-d + new-amt-shed
@@ -705,6 +689,7 @@ to d-shed
   if d-SIR-dog-Shed = TRUE and d-days-shed-dog > 3 and d-days-shed-dog <= 10 [
     set d-days-shed-dog d-days-shed-dog + 1
     let new-amt-shed d-shed-init-dog
+    ;output-print (word "new amount shed dog shedding dog serovar 2 " round new-amt-shed)    ;##
     ask patch-here [
       set e-contaminated-from-dog-d TRUE
       set e-amount-seroD-d e-amount-seroD-d + new-amt-shed
@@ -714,6 +699,7 @@ to d-shed
   if d-SIR-dog-Shed = TRUE and d-days-shed-dog > 10 [
     set d-days-shed-dog d-days-shed-dog + 1
     let new-amt-shed (d-shed-init-dog * (exp (- d-rate-decay-dog * (d-days-shed-dog - 10))))
+    ;output-print (word "new amount shed dog shedding dog serovar 3 " round new-amt-shed)    ;##
     ifelse new-amt-shed < 100
     [ set d-SIR-dog-Shed FALSE
       set d-SIR-dog-R TRUE
@@ -743,6 +729,7 @@ to d-shed
   if d-SIR-rod-Shed = TRUE and d-days-shed-rod <= 3 [
     set d-days-shed-rod d-days-shed-rod + 1
     let new-amt-shed (d-shed-init-rod * (d-days-shed-rod / 3))
+    ;output-print (word "new amount shed dog shedding rodent serovar 1 " new-amt-shed)    ;##
     ask patch-here [
       set e-contaminated-from-dog-r TRUE
       set e-amount-seroR-d e-amount-seroR-d + new-amt-shed
@@ -752,6 +739,7 @@ to d-shed
   if (d-SIR-rod-Shed = TRUE and d-days-shed-rod > 3 and d-days-shed-rod <= 10) [
     set d-days-shed-rod d-days-shed-rod + 1
     let new-amt-shed d-shed-init-rod
+    ;output-print (word "new amount shed dog shedding rodent serovar 2 " new-amt-shed)    ;##
     ask patch-here [
       set e-contaminated-from-dog-r TRUE
       set e-amount-seroR-d e-amount-seroR-d + new-amt-shed
@@ -759,31 +747,28 @@ to d-shed
       ]
     ]
   if (d-SIR-rod-Shed = TRUE and d-days-shed-rod > 10) [
-   set d-days-shed-rod d-days-shed-rod + 1
-   let new-amt-shed (d-shed-init-rod * (exp (- d-rate-decay-rod * (d-days-shed-rod - 10))))
-   ifelse new-amt-shed < 100
-   [ set d-SIR-rod-Shed FALSE
-     set d-SIR-rod-R TRUE ]                                             ;ABelsare_edits: do Recoverds (d-SIR-rod-R) remain recoverds for ever?
-   [ ask patch-here [
-     set e-contaminated-from-dog-r TRUE
-     set e-amount-seroR-d e-amount-seroR-d + new-amt-shed
-     set e-amount-seroR e-amount-seroR + new-amt-shed ]
-   ]
-   ]
+    set d-days-shed-rod d-days-shed-rod + 1
+    let new-amt-shed (d-shed-init-rod * (exp (- d-rate-decay-rod * (d-days-shed-rod - 10))))
+    ;output-print (word "new amount shed dog shedding rodent serovar 3 " new-amt-shed)    ;##
+    ifelse new-amt-shed < 100
+    [ set d-SIR-rod-Shed FALSE
+      set d-SIR-rod-R TRUE ]                                             ;ABelsare_edits: do Recoverds (d-SIR-rod-R) remain recoverds for ever?
+    [ ask patch-here [
+      set e-contaminated-from-dog-r TRUE
+      set e-amount-seroR-d e-amount-seroR-d + new-amt-shed
+      set e-amount-seroR e-amount-seroR + new-amt-shed ]
+      ]
+    ]
 end
 ;---------RODENTS------------
 to r-die
   let Nr (count rodents)
   if r-age < 8 [
-    ;let r-death (random-float 1)
-    ;if (r-death < r-death-prob-juv * Nr / r-init)
     if (random-float 1 < r-death-prob-juv * Nr / r-init) [
       die
       ]
     ]
   if r-age >= 8 [
-    ;let r-death (random-float 1)
-    ;if (r-death < r-death-prob-adult * Nr / r-init)
     if (random-float 1 < r-death-prob-adult * Nr / r-init) [
       die
       ]
@@ -792,8 +777,6 @@ end
 to r-birth
   let Nr (count rodents)
   if week > 12 and week <= 38 [                                                           ;10July17 AVB replaced year with week
-    ;if r-age >= 8
-    ;[
     let r-birth-p (random-float 1) * 4
     if (r-birth-p < r-birth-prob-low * r-init / Nr) [
       hatch 1                                                   ; hatch replacement rodents
@@ -817,6 +800,16 @@ to r-birth
         set r-birth-prob-low (0.2063)
         set r-death-prob-juv (0.0830)
         set r-death-prob-adult (0.0957)
+        set r-incub-pd-rod 7 + random 8 ;random (7) + 7                  ;## ;AB 14Jan18 changed to make it 7 to 14
+        set r-days-incub-rod 0
+        set r-shed-init-rod abs ((random-normal 6100000 1500000) * 7.58)
+        set r-days-shed-rod 0
+        set r-rate-decay-rod (0.15 + random-float 0.2)
+        set r-incub-pd-dog 7 + random 8    ;random (7) + 7   ;AB 14Jan18 changed code to get a value between 7 and 14
+        set r-days-incub-dog 0
+        set r-shed-init-dog abs((random-normal 6100000 1500000) * 7.58)
+        set r-days-shed-dog 0
+        set r-rate-decay-dog (0.3 + random-float 0.4)
         ]
       ]
     ]
@@ -840,16 +833,32 @@ to r-birth
         set r-SIR-rod-I FALSE
         set r-SIR-rod-Shed FALSE
         set r-SIR-rod-R FALSE
+        set r-birth-prob-high (0.6027)
+        set r-birth-prob-low (0.2063)
+        set r-death-prob-juv (0.0830)
+        set r-death-prob-adult (0.0957)
+        set r-incub-pd-rod 7 + random 8 ;random (7) + 7                               ;AB 14Jan18 changed to make it 7 to 14
+        set r-days-incub-rod 0
+        set r-shed-init-rod abs ((random-normal 6100000 1500000) * 7.58)
+        set r-days-shed-rod 0
+        set r-rate-decay-rod (0.15 + random-float 0.2)
+        set r-incub-pd-dog 7 + random 8    ;random (7) + 7   ;AB 14Jan18 changed code to get a value between 7 and 14
+        set r-days-incub-dog 0
+        set r-shed-init-dog abs((random-normal 6100000 1500000) * 7.58)
+        set r-days-shed-dog 0
+        set r-rate-decay-dog (0.3 + random-float 0.4)
         ]
       ]
     ]
 end
 to r-go
   repeat 7 [
-    move-to r-start-patch
+    pd
     move-to one-of patches in-radius r-home-range
+    pe
     r-get-infected
     r-shed
+    move-to r-start-patch
     ]
 end
 to r-get-infected
@@ -876,39 +885,24 @@ to r-get-infected
 end
 to prob-infection-rdogserovar
   if (r-SIR-dog-S = TRUE and r-SIR-rod-S = TRUE) [   ;18Aug17 ABelsare_edits: added and r-SIR-rod-S = TRUE to prevent coinfection
-    if (random-float 1 < 0.01) [
+    if (random-float 1 < rodent-rodent-transmission) [;0.01) [                       ;##rodent-rodent-transmission
       set r-SIR-dog-I TRUE
-      set r-incub-pd-dog 7 + random 8    ;random (7) + 7   ;AB 14Jan18 changed code to get a value between 7 and 14
-      set r-days-incub-dog 0
-      set r-shed-init-dog abs((random-normal 6100000 1500000) * 7.58)
-      set r-days-shed-dog 0
-      set r-rate-decay-dog (0.3 + random-float 0.4)
       set r-SIR-dog-S FALSE
       ]
     ]
 end
 to prob-infection-rpdogserovar
-  if (r-SIR-dog-S = TRUE and r-SIR-rod-S = TRUE) [           ;18Aug17 ABelsare_edits: only susceptible dogs get infected from the patch
+  if (r-SIR-dog-S = TRUE and r-SIR-rod-S = TRUE) [           ;18Aug17 ABelsare_edits: only susceptible dogs(??) get infected from the patch
     if (random-float 1 < p-inf-dog) [
       set r-SIR-dog-I TRUE
-      set r-incub-pd-dog 7 + random 8       ;random (7) + 7  ;AB 14Jan18 changed code to get a vlue between 7 and 14
-      set r-days-incub-dog 0
-      set r-shed-init-dog abs((random-normal 6100000 1500000) * 7.58)
-      set r-days-shed-dog 0
-      set r-rate-decay-dog (0.3 + random-float 0.4)
       set r-SIR-dog-S FALSE
       ]
     ]
 end
 to prob-infection-rrodentserovar
   if (r-SIR-rod-S = TRUE and r-SIR-dog-S = TRUE) [     ;18Aug17 ABelsare_edits: added ..and r-SIR-dog-S = TRUE ...to prevent coinfection
-    if (random-float 1 < 0.01) [
+    if (random-float 1 < rodent-rodent-transmission) [;0.01) [                        ;##rodent-rodent-transmission
       set r-SIR-rod-I TRUE
-      set r-incub-pd-rod 7 + random 8 ;random (7) + 7
-      set r-days-incub-rod 0
-      set r-shed-init-rod abs((random-normal 6100000 1500000) * 7.58)
-      set r-days-shed-rod 0
-      set r-rate-decay-rod (0.15 + random-float 0.2)
       set r-SIR-rod-S FALSE
       ]
     ]
@@ -917,11 +911,6 @@ to prob-infection-rprodentserovar
   if (r-SIR-rod-S = TRUE and r-SIR-dog-S = TRUE) [    ;18Aug17 ABelsare_edits added r-SIR-dog-S = TRUE to prevent coinfection
     if (random-float 1 < p-inf-rod) [
       set r-SIR-rod-I TRUE
-      set r-incub-pd-rod 7 + random 8 ;random (7) + 7
-      set r-days-incub-rod 0
-      set r-shed-init-rod abs((random-normal 6100000 1500000) * 7.58)
-      set r-days-shed-rod 0
-      set r-rate-decay-rod (0.15 + random-float 0.2)
       set r-SIR-rod-S FALSE
       ]
     ]
@@ -992,25 +981,18 @@ to r-shed
 end
 ;---------- HUMANS -------------
 to h-die
-  if (random-float 1 < h-death-prob * (count humans / h-init)) [ die ]
-  ;let Nh (count humans)
-  ;let h-death (random-float 1)
-  ;if (h-death < h-death-prob * Nh / h-init) [
-    ;die
-    ;]
+  ifelse (h-SIR-dog-I = TRUE or h-SIR-rod-I = TRUE)
+  [ if random-float 1 < ((h-death-prob * 1.1) * (count humans / h-init)) [ die ] ]
+  [ if random-float 1 < (h-death-prob * (count humans / h-init)) [ die ] ]
 end
 to h-birth
   if (random-float 1 < h-birth-prob * (h-init / count humans))[
-;    let Nh (count humans)
-;    let h-birth-p (random-float 1)
-;    if (h-birth-p < h-birth-prob * h-init / Nh)
-      ;[
     hatch 1 [
       set shape "person"
       set color blue
       set size 2
       set h-HH-id random ((length HH-xcor) * (length HH-ycor))
-      setxy [ xcor ] of HH h-HH-id [ycor] of HH h-HH-id
+      setxy [ xcor ] of HH h-HH-id [ ycor ] of HH h-HH-id
       set h-SIR-dog-S TRUE
       set h-SIR-dog-I FALSE
       set h-SIR-dog-R FALSE
@@ -1019,8 +1001,6 @@ to h-birth
       set h-SIR-rod-R FALSE
       set h-days-inf-dog 0
       set h-days-inf-rod 0
-      ;set h-birth-prob 0.000266                                                  ;AB 14Jan18 now using to-report
-      set h-death-prob 0.000266
       set h-prob-move 0.50
       set h-start-patch patch-here ]
     ]
@@ -1029,8 +1009,6 @@ to h-go
   repeat 7 [
     move-to h-start-patch
     ifelse (random-float 1 < h-prob-move)
-    ;let prob-move (random-float 1)
-    ;ifelse (prob-move < h-prob-move)
     [ move-to one-of patches in-radius 10 ]
     [ move-to one-of patches ]
     h-get-infected
@@ -1040,25 +1018,19 @@ end
 to h-get-infected
   if h-SIR-dog-S = TRUE [
     if random-float 1 < (p-inf-dog / 100) [
-      ;let prob-inf (random-float 1)
-      ;if prob-inf < (p-inf-dog / 100)[
       set h-SIR-dog-I TRUE
       if (week < 53) [ set cum-ann-human-dl-inc cum-ann-human-dl-inc + 1 ]
-      set h-days-inf-dog (random 28 + 2)
+      set h-days-inf-dog 2 + random 29
       set h-SIR-dog-S FALSE
-      set h-death-prob h-death-prob * 1.1 ;0.000266 * 1.1     ;AB code change as h-death-prob is now an agent variable
       set h-incident-case-seroD h-incident-case-seroD + 1
       ]
     ]
   if h-SIR-rod-S = TRUE [
     if (random-float 1 < (p-inf-rod / 100)) [
-      ;let prob-inf (random-float 1)
-      ;if prob-inf < (p-inf-rod / 100)[
       set h-SIR-rod-I TRUE
       if (week < 53) [ set cum-ann-human-rl-inc cum-ann-human-rl-inc + 1 ]
       set h-days-inf-rod 2 + random 29 ;random (28) + 2       ;AB 14Jan18 changed to get a value between 2 and 30
       set h-SIR-rod-S FALSE
-      set h-death-prob h-death-prob * 1.1    ;0.000266 * 1.1      ;AB Code change as h-death-prob is now an agent variable
       set h-incident-case-seroR h-incident-case-seroR + 1
       ]
     ]
@@ -1108,6 +1080,9 @@ to e-decay                          ;AB 21Jan18 - potemtial issue here: p-inf-ro
 to-report h-birth-prob
   report 0.000266
 end
+to-report h-death-prob
+  report 0.000266
+end
 to-report d-birth-prob
   report 0.1480
 end
@@ -1118,7 +1093,7 @@ to-report sd-init-prev
   report 0.04
 end
 to-report r-init-prev
-  report 0.17
+  report 0.17               ;##
 end
 to-report sdog-addl-sus
   report 0.5
@@ -1187,7 +1162,7 @@ BUTTON
 123
 10
 187
-44
+43
 Go
 go
 T
@@ -1507,7 +1482,7 @@ CHOOSER
 Output_file?
 Output_file?
 "YES" "NO"
-0
+1
 
 MONITOR
 1208
@@ -1549,6 +1524,36 @@ decay-factor
 0
 1
 0.8
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+12
+367
+184
+400
+dog-dog-transmission
+dog-dog-transmission
+0
+1
+0.05
+0.01
+1
+NIL
+HORIZONTAL
+
+SLIDER
+10
+409
+187
+442
+rodent-rodent-transmission
+rodent-rodent-transmission
+0
+1
+0.01
 0.01
 1
 NIL
